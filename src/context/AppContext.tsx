@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { getOrCreateProfile, updateProfile } from '../services/supabase';
 
 type Announcement = {
   id: number;
@@ -27,6 +28,7 @@ interface AppContextType {
   unreadCount: number;
   isOnboarded: boolean;
   setOnboarded: (onboarded: boolean) => void;
+  loading: boolean;
 }
 
 const GlobalAppContext = createContext<AppContextType | undefined>(undefined);
@@ -90,22 +92,41 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     return stored ? JSON.parse(stored) as boolean : false;
   });
 
+  const [loading, setLoading] = useState(true);
+
   const [announcements, setAnnouncements] = useState<Announcement[]>(() => {
     return [...SYSTEM_ANNOUNCEMENTS];
   });
 
-  // Sync profile with Firebase user info on login
+  // Load profile from Supabase on login
   useEffect(() => {
     if (user) {
-      setProfileState(prev => {
-        const updated = {
-          ...prev,
-          name: prev.name || user.displayName || '',
-          email: prev.email || user.email || ''
-        };
-        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(updated));
-        return updated;
+      setLoading(true);
+      getOrCreateProfile(user.uid, {
+        display_name: user.displayName || '',
+        email: user.email || '',
+      }).then((data) => {
+        if (data) {
+          const loadedProfile: UserProfile = {
+            name: data.display_name || user.displayName || '',
+            email: data.email || user.email || '',
+            university: data.university || '',
+            faculty: data.faculty || '',
+            department: data.department || '',
+            courseLevel: data.level ? String(data.level) : ''
+          };
+          setProfileState(loadedProfile);
+          setOnboarded(!!data.university);
+          localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(loadedProfile));
+          localStorage.setItem(ONBOARDED_STORAGE_KEY, JSON.stringify(!!data.university));
+        }
+        setLoading(false);
+      }).catch((err) => {
+        console.error('Supabase load failed, using localStorage:', err);
+        setLoading(false);
       });
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -115,6 +136,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       setProfileState({ ...EMPTY_PROFILE });
       setOnboarded(false);
       setAnnouncements([...SYSTEM_ANNOUNCEMENTS]);
+      setLoading(false);
       localStorage.removeItem(PROFILE_STORAGE_KEY);
       localStorage.removeItem(ONBOARDED_STORAGE_KEY);
     }
@@ -127,11 +149,26 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [profile.university]);
 
-  const setProfile = (newProfile: UserProfile) => {
+  const setProfile = async (newProfile: UserProfile) => {
     setProfileState(newProfile);
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(newProfile));
     if (newProfile.university) {
       setAnnouncements(getAnnouncementsForUniversity(newProfile.university));
+    }
+    // Sync to Supabase
+    if (user) {
+      try {
+        await updateProfile(user.uid, {
+          display_name: newProfile.name,
+          email: newProfile.email,
+          university: newProfile.university,
+          faculty: newProfile.faculty,
+          department: newProfile.department,
+          level: parseInt(newProfile.courseLevel) || 100
+        });
+      } catch (err) {
+        console.error('Failed to sync profile to Supabase:', err);
+      }
     }
   };
 
@@ -152,7 +189,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       markAnnouncementRead,
       unreadCount,
       isOnboarded,
-      setOnboarded
+      setOnboarded,
+      loading
     }}>
       {children}
     </GlobalAppContext.Provider>
