@@ -54,14 +54,14 @@ export const UNIVERSITIES = {
     ]
   },
   "Vision University": {
-    "Faculty of Basic and Applied Science": [
+    "Faculty of Basic & Applied Sciences": [
       "Biological Sciences",
       "Chemical Sciences",
       "Computer Science and Mathematics",
       "Physics"
     ],
-    "Faculty of Humanities, Management and Social Science": [
-      "Accounting and Finance",
+    "Faculty of Humanities, Management & Social Sciences": [
+      "Accounting & Finance",
       "Business Administration",
       "Economics",
       "History",
@@ -69,7 +69,7 @@ export const UNIVERSITIES = {
       "Mass Communication",
       "Sociology"
     ],
-    "Faculty of Basic Medical and Health Science": [
+    "Faculty of Basic & Medical Sciences": [
       "Nursing Science",
       "Medical Laboratory Science",
       "Public Health"

@@ -8,13 +8,14 @@ import Schedule from './pages/Schedule';
 import Study from './pages/Study';
 import Profile from './pages/Profile';
 import Announcements from './pages/Announcements';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useAppGlobal } from './context/AppContext';
 import { StudyProvider } from './context/StudyContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { isOnboarded, loading: profileLoading } = useAppGlobal();
   
-  if (loading) {
+  if (authLoading || profileLoading) {
     return (
       <div style={{
         display: 'flex',
@@ -30,6 +31,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   
   if (!user) {
     return <Navigate to="/login" />;
+  }
+  
+  if (!isOnboarded) {
+    return <Navigate to="/onboarding" />;
   }
   
   return <>{children}</>;
