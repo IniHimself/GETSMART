@@ -32,7 +32,7 @@ export default function AppLayout() {
           display: flex;
           flex-direction: column;
           z-index: 50;
-          border-right: 1px solid var(--color-border, rgba(0,0,0,0.1));
+          border-right: 1px solid rgba(0,0,0,0.1);
         }
         .main-content {
           flex: 1;
@@ -44,31 +44,66 @@ export default function AppLayout() {
         @media (max-width: 768px) {
           .app-sidebar {
             width: 100%;
-            height: 70px;
+            height: auto;
+            min-height: 64px;
             position: fixed;
             bottom: 0;
             left: 0;
+            right: 0;
             flex-direction: row;
             border-right: none;
-            border-top: 1px solid var(--color-border, rgba(0,0,0,0.1));
-            padding: 0 0.5rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding: 0.375rem 0.5rem;
+            padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
+            background: var(--background-color-secondary);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
           }
-          .hide-on-mobile { display: none; }
-          .main-content { padding-bottom: 90px; }
-          .sidebar-brand { display: none; }
+          .hide-on-mobile { display: none !important; }
+          .main-content { 
+            padding: 1rem !important; 
+            padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important; 
+          }
+          .sidebar-brand { display: none !important; }
           .nav-links-container { 
             display: flex; 
             width: 100%; 
-            justify-content: space-between;
+            justify-content: space-around;
+            align-items: center;
           }
           .nav-links-container a { 
-            margin-bottom: 0; 
-            padding: 0.75rem; 
+            margin-bottom: 0 !important; 
+            padding: 0.5rem !important; 
             justify-content: center;
+            border-radius: 12px !important;
+            min-width: 48px;
+            min-height: 48px;
           }
+          .nav-links-container a span {
+            display: none;
+          }
+          .timer-pill-mobile {
+            display: flex !important;
+            position: fixed;
+            bottom: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: bounceIn 0.3s ease;
+          }
+        }
+        @media (min-width: 769px) {
+          .timer-pill-mobile { display: none !important; }
         }
       `}</style>
       
@@ -137,6 +172,14 @@ export default function AppLayout() {
           <SidebarItem to="/profile" icon={<User size={20} />} label="Profile" />
         </div>
       </div>
+
+      {/* Mobile timer pill */}
+      {timerState.session?.isActive && (
+        <div className="timer-pill-mobile" onClick={() => navigate('/study')}>
+          <Clock size={14} style={{ marginRight: '0.375rem' }} />
+          {formatDuration(getCurrentDuration())}
+        </div>
+      )}
 
       <div className="main-content">
         <Outlet />

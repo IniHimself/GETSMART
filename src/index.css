@@ -1012,3 +1012,175 @@ body {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+/* ============================================
+   COMPREHENSIVE MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Mobile (max 768px) */
+@media (max-width: 768px) {
+  /* Layout */
+  .main-content {
+    padding: 1rem !important;
+    padding-bottom: 90px !important;
+  }
+
+  /* Page headings */
+  h1 {
+    font-size: 1.4rem !important;
+  }
+
+  h2 {
+    font-size: 1.2rem !important;
+  }
+
+  /* Cards and content */
+  .login-content {
+    padding: 1rem !important;
+    border-radius: 16px !important;
+  }
+
+  /* Grid layouts - force single column */
+  .grid-responsive {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Buttons */
+  .base-button-component {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .primary-button-component {
+    padding: 0.625rem 1.25rem !important;
+  }
+
+  .btn-block {
+    width: 100% !important;
+  }
+
+  /* Form inputs */
+  .thea-text-input {
+    padding: 0.75rem !important;
+    font-size: 16px !important; /* Prevents iOS zoom */
+    width: 100% !important;
+  }
+
+  /* Card hover effects - disable on touch */
+  .card-hover:hover {
+    transform: none !important;
+  }
+
+  /* Tab navigation */
+  .tab-nav {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tab-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-nav button {
+    white-space: nowrap;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* Progress bars */
+  .progress-animated {
+    height: 6px !important;
+  }
+
+  /* Tags */
+  .tag {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* FAB button */
+  .fab {
+    bottom: 80px !important;
+    right: 1rem !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  /* Loader */
+  .loader-ring {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Smooth animations - reduce on mobile for performance */
+  .fade-enter {
+    animation-duration: 0.2s !important;
+  }
+
+  /* Toast/notification positioning */
+  .toast-container {
+    bottom: 80px !important;
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+}
+
+/* Small phones (max 480px) */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 0.75rem !important;
+    padding-bottom: 80px !important;
+  }
+
+  h1 {
+    font-size: 1.2rem !important;
+  }
+
+  .login-content {
+    padding: 0.75rem !important;
+    border-radius: 12px !important;
+  }
+
+  /* Make grids single column on very small screens */
+  div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+  }
+
+  /* Fix for iOS safe areas */
+  .app-sidebar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Better spacing for mobile forms */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Stack flex containers on mobile */
+  .flex-responsive {
+    flex-direction: column;
+  }
+}

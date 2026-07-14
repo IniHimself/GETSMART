@@ -41,6 +41,18 @@ export default function Study() {
     ? GST_COURSES.filter(c => c.university === profile.university || !c.university)
     : GST_COURSES;
 
+  // Get user's department courses based on onboarding selection
+  const getUserDepartmentCourses = (uni: University): Course[] => {
+    if (!profile.faculty || !profile.department) {
+      // If no faculty/department selected, show all courses
+      return uni.faculties.flatMap(f => f.departments.flatMap(d => d.courses));
+    }
+    const faculty = uni.faculties.find(f => f.id === profile.faculty);
+    if (!faculty) return [];
+    const dept = faculty.departments.find(d => d.id === profile.department);
+    return dept ? dept.courses : [];
+  };
+
   const handleSelectUniversity = (uni: University) => {
     setSelectedUniversity(uni);
     setView('courses');
@@ -261,6 +273,12 @@ export default function Study() {
 
   // COURSE SELECTION VIEW
   if (view === 'courses' && selectedUniversity) {
+    const userCourses = getUserDepartmentCourses(selectedUniversity);
+    const hasFacultyDept = profile.faculty && profile.department;
+    const facultyName = selectedUniversity.faculties.find(f => f.id === profile.faculty)?.name || '';
+    const deptName = selectedUniversity.faculties.find(f => f.id === profile.faculty)
+      ?.departments.find(d => d.id === profile.department)?.name || '';
+
     return (
       <div className="fade-enter fade-enter-active">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
@@ -272,24 +290,97 @@ export default function Study() {
               {selectedUniversity.name}
             </h1>
             <p style={{ color: 'var(--secondary-text-color)', margin: '0.25rem 0 0 0', fontSize: '0.9rem' }}>
-              Select a faculty and department
+              {hasFacultyDept ? `${deptName} courses` : 'Select a faculty and department'}
             </p>
           </div>
         </div>
 
-        {selectedUniversity.faculties.map(faculty => (
-          <div key={faculty.id} style={{ marginBottom: '2rem' }}>
+        {/* User's Department Courses */}
+        {hasFacultyDept && (
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{ 
+              display: 'flex', alignItems: 'center', gap: '0.75rem', 
+              marginBottom: '0.75rem', padding: '0.75rem 1rem',
+              background: 'rgba(0,117,255,0.1)', borderRadius: '12px'
+            }}>
+              <BookOpen size={18} style={{ color: 'var(--primary)' }} />
+              <div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '600' }}>{facultyName}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>{deptName}</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+              {userCourses.map(course => (
+                <div
+                  key={course.id}
+                  onClick={() => handleSelectCourse(course)}
+                  className="login-content card-hover"
+                  style={{ padding: '1rem', cursor: 'pointer' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{
+                      width: '36px', height: '36px', borderRadius: '10px',
+                      background: 'var(--primary)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                    }}>
+                      <BookOpen size={16} color="white" />
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: '600' }}>{course.code}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course.title}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* GST Courses */}
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ color: 'var(--text-color)', fontSize: '1rem', fontWeight: '600', marginBottom: '0.75rem' }}>
+            General Studies (GST)
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+            {studentUniGST.map(course => (
+              <div
+                key={course.id}
+                onClick={() => handleSelectCourse(course)}
+                className="login-content card-hover"
+                style={{ padding: '1rem', cursor: 'pointer' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: 'var(--brightLavender)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                  }}>
+                    <BookOpen size={16} color="var(--night)" />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: '600' }}>{course.code}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course.title}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Fallback: Show all faculties if no department selected */}
+        {!hasFacultyDept && (
+          <div>
             <h3 style={{ color: 'var(--text-color)', fontSize: '1rem', fontWeight: '600', marginBottom: '1rem' }}>
-              {faculty.name}
+              All Faculties
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-              {faculty.departments.map(dept => (
-                <div key={dept.id}>
-                  <h4 style={{ color: 'var(--secondary-text-color)', fontSize: '0.85rem', fontWeight: '500', marginBottom: '0.75rem' }}>
-                    {dept.name}
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {dept.courses.map(course => (
+            {selectedUniversity.faculties.map(faculty => (
+              <div key={faculty.id} style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ color: 'var(--secondary-text-color)', fontSize: '0.9rem', fontWeight: '500', marginBottom: '0.75rem' }}>
+                  {faculty.name}
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+                  {faculty.departments.map(dept => (
+                    dept.courses.map(course => (
                       <div
                         key={course.id}
                         onClick={() => handleSelectCourse(course)}
@@ -300,23 +391,23 @@ export default function Study() {
                           <div style={{
                             width: '36px', height: '36px', borderRadius: '10px',
                             background: 'var(--primary)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                           }}>
                             <BookOpen size={16} color="white" />
                           </div>
-                          <div>
+                          <div style={{ minWidth: 0 }}>
                             <div style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: '600' }}>{course.code}</div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500' }}>{course.title}</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-color)', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course.title}</div>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     );
   }
@@ -416,7 +507,7 @@ export default function Study() {
 
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 240px), 1fr))', 
           gap: '1rem' 
         }}>
           {/* Smart Study */}
