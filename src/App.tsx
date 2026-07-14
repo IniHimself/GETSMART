@@ -11,56 +11,43 @@ import Announcements from './pages/Announcements';
 import { AppProvider, useAppGlobal } from './context/AppContext';
 import { StudyProvider } from './context/StudyContext';
 
+const LoadingScreen = () => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    background: 'var(--background-color)'
+  }}>
+    <div className="loader-ring" />
+  </div>
+);
+
+function OnboardingGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading: authLoading } = useAuth();
+  const { isOnboarded, loading: profileLoading } = useAppGlobal();
+  
+  if (authLoading || profileLoading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/login" />;
+  if (isOnboarded) return <Navigate to="/home" />;
+  return <>{children}</>;
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const { isOnboarded, loading: profileLoading } = useAppGlobal();
   
-  if (authLoading || profileLoading) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        background: 'var(--background-color)'
-      }}>
-        <div className="loader-ring" />
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-  
-  if (!isOnboarded) {
-    return <Navigate to="/onboarding" />;
-  }
-  
+  if (authLoading || profileLoading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/login" />;
+  if (!isOnboarded) return <Navigate to="/onboarding" />;
   return <>{children}</>;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   
-  if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        background: 'var(--background-color)'
-      }}>
-        <div className="loader-ring" />
-      </div>
-    );
-  }
-  
-  if (user) {
-    return <Navigate to="/home" />;
-  }
-  
+  if (loading) return <LoadingScreen />;
+  if (user) return <Navigate to="/home" />;
   return <>{children}</>;
 }
 
@@ -78,9 +65,9 @@ function App() {
               } />
               
               <Route path="/onboarding" element={
-                <ProtectedRoute>
+                <OnboardingGuard>
                   <Onboarding />
-                </ProtectedRoute>
+                </OnboardingGuard>
               } />
               
               <Route element={

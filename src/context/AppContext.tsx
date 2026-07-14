@@ -102,6 +102,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (user) {
       setLoading(true);
+      const hadOnboarded = localStorage.getItem(ONBOARDED_STORAGE_KEY) === 'true';
+      
       getOrCreateProfile(user.uid, {
         display_name: user.displayName || '',
         email: user.email || '',
@@ -116,13 +118,26 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             courseLevel: data.level ? String(data.level) : ''
           };
           setProfileState(loadedProfile);
-          setOnboarded(!!data.university);
+          
+          // If Supabase profile has a university, trust it
+          // If not, check if we already had onboarded in localStorage (existing user)
+          if (data.university) {
+            setOnboarded(true);
+          } else if (hadOnboarded) {
+            // Keep onboarded from localStorage for existing users
+            setOnboarded(true);
+          }
+          // else: new user, stays false
+          
           localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(loadedProfile));
-          localStorage.setItem(ONBOARDED_STORAGE_KEY, JSON.stringify(!!data.university));
+          if (data.university) {
+            localStorage.setItem(ONBOARDED_STORAGE_KEY, 'true');
+          }
         }
         setLoading(false);
       }).catch((err) => {
         console.error('Supabase load failed, using localStorage:', err);
+        // Keep localStorage values as-is
         setLoading(false);
       });
     } else {
