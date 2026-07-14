@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 import Onboarding from './pages/Onboarding';
 import AppLayout from './components/layout/AppLayout';
 import Home from './pages/Home';
@@ -61,6 +62,12 @@ function App() {
               <Route path="/login" element={
                 <PublicRoute>
                   <Login />
+                </PublicRoute>
+              } />
+
+              <Route path="/signup" element={
+                <PublicRoute>
+                  <SignUp />
                 </PublicRoute>
               } />
               

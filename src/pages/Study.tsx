@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BookOpen, BrainCircuit, Clock, Gamepad2, TrendingUp, Sparkles, MessageSquare, ArrowLeft, Loader2 } from 'lucide-react';
+import { BookOpen, BrainCircuit, Clock, Gamepad2, TrendingUp, Sparkles, MessageSquare, ArrowLeft, Loader2, Upload } from 'lucide-react';
 import { useStudy } from '../context/StudyContext';
 import { useAppGlobal } from '../context/AppContext';
 import { UNIVERSITIES, GST_COURSES, type Course, type University } from '../data/courses';
@@ -9,8 +9,9 @@ import StudyGuide from '../components/study/StudyGuide';
 import GameCard from '../components/study/GameCard';
 import FlashCard, { type FlashCardData } from '../components/study/FlashCard';
 import FocusTimer from '../components/study/FocusTimer';
+import CourseMaterialUpload from '../components/study/CourseMaterialUpload';
 
-type Mode = 'overview' | 'smart-study' | 'guide' | 'timer' | 'game' | 'flashcards';
+type Mode = 'overview' | 'smart-study' | 'guide' | 'timer' | 'game' | 'flashcards' | 'upload';
 
 interface CourseTopics {
   courseCode: string;
@@ -146,6 +147,16 @@ export default function Study() {
           showMilestoneAlert('Flashcard session complete!');
           setMode('overview');
         }}
+      />
+    );
+  }
+
+  if (mode === 'upload' && selectedCourse) {
+    return (
+      <CourseMaterialUpload
+        courseCode={selectedCourse.code}
+        courseTitle={selectedCourse.title}
+        onBack={() => setMode('overview')}
       />
     );
   }
@@ -489,6 +500,27 @@ export default function Study() {
             <span style={{ fontWeight: '700', fontSize: '1rem' }}>Flashcards</span>
             <span style={{ fontSize: '0.8rem', opacity: 0.9, marginTop: '0.25rem' }}>
               Flip to learn & review
+            </span>
+          </button>
+
+          {/* Course Material Upload */}
+          <button
+            onClick={() => setMode('upload')}
+            className="base-button-component"
+            style={{
+              padding: '2rem',
+              background: 'linear-gradient(135deg, var(--brightLavender), var(--brighterLavender))',
+              color: 'white',
+              border: 'none',
+              borderRadius: '20px',
+              flexDirection: 'column',
+              textAlign: 'center'
+            }}
+          >
+            <Upload size={36} style={{ marginBottom: '0.75rem' }} />
+            <span style={{ fontWeight: '700', fontSize: '1rem' }}>Upload Materials</span>
+            <span style={{ fontSize: '0.8rem', opacity: 0.9, marginTop: '0.25rem' }}>
+              Upload notes & study with AI
             </span>
           </button>
 
