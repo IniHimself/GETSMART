@@ -27,6 +27,7 @@ export default function CourseMaterialUpload({ courseCode, courseTitle, onBack }
   const [loading, setLoading] = useState(false);
   const [_error, setError] = useState('');
   const [mode, setMode] = useState<'upload' | 'chat'>('upload');
+  const [questionCount, setQuestionCount] = useState(10);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +121,7 @@ ${fileContext}
 
 Include key concepts, definitions, formulas, and important points organized by topic.`;
       } else if (type === 'quiz') {
-        prompt = `Based on these course materials for "${courseCode}: ${courseTitle}", generate 10 practice quiz questions:
+        prompt = `Based on these course materials for "${courseCode}: ${courseTitle}", generate exactly ${questionCount} practice quiz questions:
 
 ${fileContext}
 
@@ -132,7 +133,7 @@ Return ONLY a JSON array in this format:
   "explanation": "Brief explanation"
 }]`;
       } else {
-        prompt = `Based on these course materials for "${courseCode}: ${courseTitle}", generate 10 study flashcards:
+        prompt = `Based on these course materials for "${courseCode}: ${courseTitle}", generate ${questionCount} study flashcards:
 
 ${fileContext}
 
@@ -263,7 +264,44 @@ Return ONLY a JSON array in this format:
 
       {/* Quick Actions */}
       {files.length > 0 && mode === 'upload' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        <>
+          <div className="login-content" style={{ padding: '1rem', marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-color)', fontSize: '0.85rem' }}>
+              Number of questions/cards to generate
+            </label>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              {[5, 10, 15, 20, 30].map(num => (
+                <button
+                  key={num}
+                  onClick={() => setQuestionCount(num)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    border: questionCount === num ? '2px solid var(--primary)' : '1px solid var(--border-style)',
+                    background: questionCount === num ? 'var(--highlight-background-color)' : 'transparent',
+                    color: questionCount === num ? 'var(--primary)' : 'var(--secondary-text-color)',
+                    cursor: 'pointer',
+                    fontWeight: questionCount === num ? '600' : '400',
+                    fontSize: '0.85rem',
+                    fontFamily: 'inherit'
+                  }}
+                >
+                  {num}
+                </button>
+              ))}
+              <input
+                type="number"
+                min={5}
+                max={50}
+                value={questionCount}
+                onChange={(e) => setQuestionCount(Math.min(50, Math.max(5, parseInt(e.target.value) || 5)))}
+                className="thea-text-input"
+                style={{ width: '80px', textAlign: 'center', padding: '0.5rem' }}
+              />
+              <span style={{ fontSize: '0.8rem', color: 'var(--secondary-text-color)' }}>questions</span>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.5rem' }}>
           {[
             { type: 'summary' as const, label: 'Generate Summary', icon: '📝' },
             { type: 'quiz' as const, label: 'Practice Quiz', icon: '❓' },
@@ -286,6 +324,7 @@ Return ONLY a JSON array in this format:
             </button>
           ))}
         </div>
+        </>
       )}
 
       {/* Chat Section */}
